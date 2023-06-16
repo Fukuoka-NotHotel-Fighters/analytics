@@ -1,7 +1,8 @@
 const testId = 'test1'; // テストIDによってテストを特定します
+const API_DOMAIN = 'https://fukuokanothotel.azurewebsites.net';
 
 function fetchTestInfo() {
-  return fetch(`/get-test-info?testId=${testId}`).then(response => {
+  return fetch(`${API_DOMAIN}/get-test-info?testId=${testId}`).then(response => {
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -15,7 +16,7 @@ function updateDOM(html) {
 }
 
 function trackEvent(eventData) {
-  return fetch('/track-event', {
+  return fetch(`${API_DOMAIN}/track-event`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -34,11 +35,26 @@ function handleEvent(eventType, elementId) {
     timestamp: new Date().toISOString(),
     version: selectedVersion,
     userAgent: navigator.userAgent,
+    userId: getUserId(),
     eventType: eventType,
     eventData: {
       elementId: elementId,
     },
   });
+}
+
+function getUserId() {
+  // Check if a user ID is saved in a cookie
+  const userIdMatch = document.cookie.match('(^|;)\\s*userId\\s*=\\s*([^;]+)');
+  let userId = userIdMatch ? userIdMatch.pop() : '';
+
+  if (!userId) {
+    // If no user ID is found, create a new one and save it in a cookie
+    userId = Math.random().toString(36).substring(2, 15);
+    document.cookie = `userId=${userId}`;
+  }
+
+  return userId;
 }
 
 let selectedVersion;
@@ -61,6 +77,7 @@ fetchTestInfo().then(testInfo => {
       timestamp: new Date().toISOString(),
       version: selectedVersion,
       userAgent: navigator.userAgent,
+      userId: getUserId(),
       eventType: 'pageView',
       eventData: { /* ここにイベントデータを追加します */ }
     }).then(() => console.log('Event tracked successfully'))

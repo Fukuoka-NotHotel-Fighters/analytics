@@ -30,6 +30,7 @@ function handleEvent(eventType, elementId) {
     version: selectedVersion,
     userAgent: navigator.userAgent,
     eventType: eventType,
+    url: window.location.href,
     eventData: {
       elementId: elementId,
     },
